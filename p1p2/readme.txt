@@ -1,4 +1,6 @@
- ~/w/ccnu-unix   …  p1p2  gcc *.c -o main           Thu Mar 28 00:17:06 2019
- ~/w/ccnu-unix   …  p1p2  ./main            462ms  Thu Mar 28 00:17:20 2019
+编写多个C语言程序，其中p1.c调用p2.c中的函数，p2.c调用p1.c中的函数。main.c调用p1.c和p2.c中的函数。p1.c与p2.c的头文件分别为h1.h与h2.h 
+-----------------------------------------
+gcc *.c -o main        
+./main           
 3
 12
