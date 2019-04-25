@@ -13,6 +13,8 @@ gcc -c p1.c
 gcc -c p2.c
 gcc -o qian main.o p1.o p2.o
 
+make clean
+
  ~/w/ccnu-unix/p1p2 ./qian
 3
 12
