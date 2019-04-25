@@ -9,6 +9,7 @@ echo ------------------------------
 echo 此层级工作目录下文件有 $docnum 个
 echo 目录有 $dirnum 个
 
+
 # ~/program02  tree
 #.
 #├── a
