@@ -33,7 +33,10 @@ void list(char dirname[]) {
             countfile += 1;
         }
 
-        getStat(direntp->d_name); 
+        char s[256];
+        sprintf(s, "%s/%s", dirname, direntp->d_name);
+
+        getStat(s); 
     }
     printf("========================\n");
     printf("文件夹数目:%d\n", countdir);
@@ -73,13 +76,18 @@ int main(int argc, char *argv[]) {
 }
 
 
-/*         224    Fri May 10 23:56:37     .
-         288    Thu May  9 09:38:13     ..
-        1535    Fri May 10 22:47:53     ls-l.c
-         664    Thu May  9 09:40:11     dirName.c
-        9084    Fri May 10 23:56:37     a.out
-        2281    Thu May  9 12:25:04     struct_stat.c
-        2115    Fri May 10 23:56:30     ls-l-advanced.c
+/*
+~/w/ccnu-unix   *…  dir  ./a.out /Users/qianqian/work/ccnu-unix
+/Users/qianqian/work/ccnu-unix:
+         288    Thu May  9 09:38:13     /Users/qianqian/work/ccnu-unix/.
+         960    Sat Mar 30 00:15:12     /Users/qianqian/work/ccnu-unix/..
+        1064    Thu Mar 28 00:15:55     /Users/qianqian/work/ccnu-unix/LICENSE
+         128    Thu Apr 25 08:23:07     /Users/qianqian/work/ccnu-unix/shell
+          56    Thu Mar 28 00:15:55     /Users/qianqian/work/ccnu-unix/README.md
+         320    Thu Apr 25 09:22:36     /Users/qianqian/work/ccnu-unix/p1p2
+         224    Sat May 11 01:00:27     /Users/qianqian/work/ccnu-unix/dir
+         448    Sat May 11 00:00:09     /Users/qianqian/work/ccnu-unix/.git
+         128    Thu Mar 28 14:07:00     /Users/qianqian/work/ccnu-unix/合法标识符
 ========================
-文件夹数目:2
-文件数目:5 */
+文件夹数目:7
+文件数目:2 */
