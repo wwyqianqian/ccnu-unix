@@ -12,9 +12,9 @@
 #include <getopt.h>
 
 void list(char[]);
-void getStat(char *);
+struct stat getStat(char *);
 void show_file_info(char *,struct stat*);
-void default_case (int argc, char *this_argv[]);
+long cmpBySize (struct stat *a, struct stat *b);
 
 
 void list(char dirname[]) {
@@ -28,7 +28,9 @@ void list(char dirname[]) {
         fprintf(stderr, "error message: %s \n", strerror(errno));
     }
  
-    while ((direntp = readdir(dir_ptr)) != NULL){
+    struct stat infos[256]; // 定义 struct stat 类型的数组用来存放 info 结构体。
+    int infos_index = 0;
+    while ((direntp = readdir(dir_ptr)) != NULL) {
 
         // http://man7.org/linux/man-pages/man3/readdir.3.html
         if (direntp->d_type == DT_DIR) {            
@@ -40,8 +42,19 @@ void list(char dirname[]) {
         char s[256];
         sprintf(s, "%s/%s", dirname, direntp->d_name);
 
-        getStat(s); 
+        struct stat this_info = getStat(s); 
+        infos[infos_index] = this_info;
+        infos_index++; 
     }
+
+    
+    qsort(infos, countdir+countfile, sizeof(struct stat), cmpBySize);
+    printf("%lld\n", infos[0].st_size);
+    printf("%lld\n", infos[1].st_size);
+    printf("%lld\n", infos[2].st_size);
+    printf("%lld\n", infos[3].st_size);
+    printf("%lld\n", infos[4].st_size);
+
     printf("========================\n");
     printf("文件夹数目:%d\n", countdir);
     printf("文件数目:%d\n", countfile);
@@ -49,22 +62,34 @@ void list(char dirname[]) {
     closedir(dir_ptr);
 }
 
-void getStat(char *filename) {
+
+long cmpBySize (struct stat *a, struct stat *b) {
+   return (a->st_size - b->st_size);
+}
+
+
+
+struct stat getStat(char *filename) {
     struct stat info;
     if (stat(filename, &info) == -1) {
         perror(filename);
     } else {
-        show_file_info(filename, &info);
+        // show_file_info(filename, &info);
+        return info;
     }
 }
 
-void show_file_info(char *filename, struct stat *info_p) {
-    char *ctime();
+// void show_file_info(char *filename, struct stat *info_p) {
+    
 
-    printf("%12ld    ", (long)info_p->st_size);
-    printf("%.19s     ", ctime(&info_p->st_mtime));
-    printf("%s\n", filename);
-}
+//     printf("%12ld    ", (long)info_p->st_size);
+//     printf("%.19ld     ", info_p->st_mtime);
+//     printf("%s\n", filename);
+// }
+
+
+
+
 
 int main(int argc, char *argv[]) {
     // http://man7.org/linux/man-pages/man3/getopt.3.html
