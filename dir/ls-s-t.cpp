@@ -13,7 +13,6 @@
 
 struct stat *list(char[], struct stat infos[]);
 struct stat getStat(char *);
-int falg(int argc, char *argv[]);
 
 long cmpBySize (struct stat *a, struct stat *b);
 long cmpByDate (struct stat *a, struct stat *b);
@@ -59,7 +58,17 @@ struct stat *list(char dirname[], struct stat infos[]) {
     return infos;
 }
 
-void printDefalt() {
+struct stat getStat(char *filename) {
+    struct stat info;
+    if (stat(filename, &info) == -1) {
+        perror(filename);
+    } else {
+        return info;
+    }
+}
+
+
+void printDefault() {
     for (int i = 0; infos[i].st_size > 0; ++i) {
         printf("%12ld    ", (long)infos[i].st_size);
         printf("%.24s     \n", ctime(&infos[i].st_mtime));  
@@ -70,13 +79,13 @@ void printDefalt() {
 
 void printBySize() {
     qsort(infos, countdir + countfile, sizeof(struct stat), cmpBySize);
-    printDefalt();
+    printDefault();
 
 }
 
 void printByDate() {
     qsort(infos, countdir + countfile, sizeof(struct stat), cmpByDate);
-    printDefalt();
+    printDefault();
 }
 
 
@@ -88,66 +97,57 @@ long cmpByDate (struct stat *a, struct stat *b) {
     return (a->st_mtime - b->st_mtime);
 }
 
-struct stat getStat(char *filename) {
-    struct stat info;
-    if (stat(filename, &info) == -1) {
-        perror(filename);
-    } else {
-        return info;
-    }
-}
 
-
-int flag(int argc, char *argv[]) {
-    // http://man7.org/linux/man-pages/man3/getopt.3.html
+int main(int argc, char const *argv[]) {
     int opt;
-    int my_flag = 2;
+    int stat_flag = 0; // stat_flag, 0 是 -s，1 是 -t
+    int path_flag = 0; // path_flag, 0 是当前(.)，1 是所键入的目录
+    
     // 输入 -t 选项，按日期从远到近排序; 输入选项 -s，文件按从小到大排序。
+    // http://man7.org/linux/man-pages/man3/getopt.3.html
+
     char *string = "st";
     while ((opt = getopt(argc, argv, string)) != -1) {
         switch (opt) {
         case 's':
             printf("-s  文件按从小到大排序:\n");
-            my_flag = 0;
-            printf("flag->>>%d",my_flag);
+            stat_flag = 0;
             break;
 
         case 't':
             printf("-t  日期从远到近排序:\n");
-            my_flag = 1;
-            printf("flag->>>%d",my_flag);
+            stat_flag = 1;
             break;
+
+        default: 
+            printf("Unknown option!");
         }
-
     }  
-    // 去除掉解析的 -s -t 选项，就是路径（操作数）
-    // if (argv[optind]) {
-    //     printf("含路径排序:\n");
-    //     // printf("%s\n", argv[optind]); // 操作数，下标从 optind 到 argc - 1。本题只有一个操作数。
-    //     my_flag = 2;
-    // } else { 
-    //     printf("无路径排序:\n");
-    //     list(".", infos);
-    //     my_flag = 2;
-    // }
 
-    return my_flag;
-}
-
-
-int main(int argc, char const *argv[]) {
-    int flag_stat = flag(argc, argv);
-
-    if (flag_stat == 0) { // by size
-        list(argv[optind], infos);
-        printBySize();
-    } else if (flag_stat == 1) { // by date
-        list(argv[optind], infos);
-        printByDate();      
-    } else {
-        printDefalt();
+    if (argv[optind]) {
+        printf("含路径排序:\n");
+        // printf("%s\n", argv[optind]); // 操作数，下标从 optind 到 argc - 1。本题只有一个操作数。
+        path_flag = 1;
+    } else { 
+        printf("无路径排序:\n");
+        // list(".", infos);
+        path_flag = 0;
     }
 
+
+    if (stat_flag == 0 && path_flag == 0) {
+        list(".", infos);
+        printBySize();
+    } else if (stat_flag == 0 && path_flag == 1) {
+        list(argv[optind], infos);
+        printBySize();
+    } else if (stat_flag == 1 && path_flag == 0) {
+        list(".", infos);
+        printByDate();        
+    } else if (stat_flag == 1 && path_flag == 1) {
+        list(argv[optind], infos);
+        printByDate();
+    }
 
 
     printf("========================\n");
@@ -157,12 +157,6 @@ int main(int argc, char const *argv[]) {
 
     return 0;
 }
-
-
-
-
-
-
 
 
 // 测试：
