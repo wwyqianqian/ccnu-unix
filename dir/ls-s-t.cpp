@@ -105,7 +105,7 @@ long cmpByDate (struct info *a, struct info *b) {
 
 int main(int argc, char const *argv[]) {
     int opt;
-    int stat_flag = 0; // stat_flag, 0 是 -s，1 是 -t
+    int stat_flag = 2; // stat_flag, 0 是 -s，1 是 -t
     int path_flag = 0; // path_flag, 0 是当前(.)，1 是所键入的目录
     
     // 输入 -t 选项，按日期从远到近排序; 输入选项 -s，文件按从小到大排序。
@@ -126,6 +126,7 @@ int main(int argc, char const *argv[]) {
 
         default: 
             printf("Unknown option!");
+            stat_flag = 2;
         }
     }  
 
@@ -135,7 +136,6 @@ int main(int argc, char const *argv[]) {
         path_flag = 1;
     } else { 
         printf("无路径排序:\n");
-        // list(".", infos);
         path_flag = 0;
     }
 
@@ -152,6 +152,12 @@ int main(int argc, char const *argv[]) {
     } else if (stat_flag == 1 && path_flag == 1) {
         list(argv[optind], infos);
         printByDate();
+    } else if (stat_flag == 2 && path_flag == 0){
+        list(".", infos);
+        printDefault();     
+    } else if (stat_flag == 2 && path_flag == 1) {
+        list(argv[optind], infos);
+        printDefault();        
     }
 
 
