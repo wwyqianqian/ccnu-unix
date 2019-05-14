@@ -11,21 +11,25 @@
 #include <unistd.h>
 #include <getopt.h>
 
-struct stat *list(char[], struct stat infos[]);
-struct stat getStat(char *);
+struct info {
+    char filename[256];
+    struct stat stat;
+};
 
-long cmpBySize (struct stat *a, struct stat *b);
-long cmpByDate (struct stat *a, struct stat *b);
+struct info *list(char[], struct info infos[]);
+struct info getStat(char *);
+
+long cmpBySize (struct info *a, struct info *b);
+long cmpByDate (struct info *a, struct info *b);
 void printDefalt();
 void printBySize();
 void printByDate();
 
-
-struct stat infos[256]; // 定义 struct stat 类型的数组用来存放 info 结构体。
+struct info infos[256]; // 定义 struct info 类型的数组用来存放 info 结构体。
 int countdir = 0;
 int countfile = 0;
 
-struct stat *list(char dirname[], struct stat infos[]) {
+struct info *list(char dirname[], struct info infos[]) {
 
     DIR *dir_ptr;
     struct dirent *direntp;
@@ -49,7 +53,7 @@ struct stat *list(char dirname[], struct stat infos[]) {
         char s[256];
         sprintf(s, "%s/%s", dirname, direntp->d_name);
 
-        struct stat this_info = getStat(s); 
+        struct info this_info = getStat(s); 
         infos[infos_index] = this_info;
         infos_index++; 
     }
@@ -58,43 +62,44 @@ struct stat *list(char dirname[], struct stat infos[]) {
     return infos;
 }
 
-struct stat getStat(char *filename) {
-    struct stat info;
-    if (stat(filename, &info) == -1) {
+struct info getStat(char *filename) {
+    struct info info;
+    strcpy(info.filename, filename);
+    if (stat(filename, &info.stat) == -1) {
         perror(filename);
     } else {
         return info;
     }
 }
 
-
 void printDefault() {
-    for (int i = 0; infos[i].st_size > 0; ++i) {
-        printf("%12ld    ", (long)infos[i].st_size);
-        printf("%.24s     \n", ctime(&infos[i].st_mtime));  
-        // printf("%s\n", filename);      
+    for (int i = 0; strlen(infos[i].filename) > 0; ++i) {
+        printf("%12ld    ", (long)infos[i].stat.st_size);
+        printf("%.24s    ", ctime(&infos[i].stat.st_mtime));  
+        printf("%s", infos[i].filename);
+        printf("\n");   
     }
 
 }
 
 void printBySize() {
-    qsort(infos, countdir + countfile, sizeof(struct stat), cmpBySize);
+    qsort(infos, countdir + countfile, sizeof(struct info), cmpBySize);
     printDefault();
 
 }
 
 void printByDate() {
-    qsort(infos, countdir + countfile, sizeof(struct stat), cmpByDate);
+    qsort(infos, countdir + countfile, sizeof(struct info), cmpByDate);
     printDefault();
 }
 
 
-long cmpBySize (struct stat *a, struct stat *b) {
-   return (a->st_size - b->st_size);
+long cmpBySize (struct info *a, struct info *b) {
+   return ((*a).stat.st_size - (*b).stat.st_size);
 }
 
-long cmpByDate (struct stat *a, struct stat *b) {
-    return (a->st_mtime - b->st_mtime);
+long cmpByDate (struct info *a, struct info *b) {
+    return ((*a).stat.st_mtime - (*b).stat.st_mtime);
 }
 
 
