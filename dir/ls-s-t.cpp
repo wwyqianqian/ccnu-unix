@@ -7,17 +7,17 @@
 #include <pwd.h>
 #include <errno.h>
 #include <stdlib.h>
-
 #include <unistd.h>
 #include <getopt.h>
 
-void list(char[]);
+struct stat *list(char[], struct stat infos[]);
 struct stat getStat(char *);
 void show_file_info(char *,struct stat*);
 long cmpBySize (struct stat *a, struct stat *b);
 
+struct stat infos[256]; // 定义 struct stat 类型的数组用来存放 info 结构体。
 
-void list(char dirname[]) {
+struct stat *list(char dirname[], struct stat infos[]) {
 
     DIR *dir_ptr;
     struct dirent *direntp;
@@ -28,7 +28,7 @@ void list(char dirname[]) {
         fprintf(stderr, "error message: %s \n", strerror(errno));
     }
  
-    struct stat infos[256]; // 定义 struct stat 类型的数组用来存放 info 结构体。
+    
     int infos_index = 0;
     while ((direntp = readdir(dir_ptr)) != NULL) {
 
@@ -47,19 +47,18 @@ void list(char dirname[]) {
         infos_index++; 
     }
 
-    
-    qsort(infos, countdir+countfile, sizeof(struct stat), cmpBySize);
-    printf("%lld\n", infos[0].st_size);
-    printf("%lld\n", infos[1].st_size);
-    printf("%lld\n", infos[2].st_size);
-    printf("%lld\n", infos[3].st_size);
-    printf("%lld\n", infos[4].st_size);
-
     printf("========================\n");
     printf("文件夹数目:%d\n", countdir);
     printf("文件数目:%d\n", countfile);
 
     closedir(dir_ptr);
+    return infos;
+}
+
+void printDefalt(struct stat *infos) {
+    printf("%12ld    ", (long)infos->st_size);
+    printf("%.19s     ", ctime(&infos->st_mtime));
+    // printf("%s\n", filename);
 }
 
 
@@ -78,17 +77,6 @@ struct stat getStat(char *filename) {
         return info;
     }
 }
-
-// void show_file_info(char *filename, struct stat *info_p) {
-    
-
-//     printf("%12ld    ", (long)info_p->st_size);
-//     printf("%.19ld     ", info_p->st_mtime);
-//     printf("%s\n", filename);
-// }
-
-
-
 
 
 int main(int argc, char *argv[]) {
@@ -112,9 +100,10 @@ int main(int argc, char *argv[]) {
     // 去除掉解析的 -s -t 选项，就是路径（操作数）
     if (argv[optind]) {
         printf("%s\n", argv[optind]); // 操作数，下标从 optind 到 argc - 1。本题只有一个操作数。
-        list(argv[optind]);
+        list(argv[optind], infos);
+        printDefalt(infos);
     } else { 
-        list(".");
+        list(".", infos);
     }
 
 }
@@ -122,6 +111,24 @@ int main(int argc, char *argv[]) {
 
 
 
+
+
+
+
+    // qsort(infos, countdir+countfile, sizeof(struct stat), cmpBySize);
+    // printf("%lld\n", infos[0].st_size);
+    // printf("%lld\n", infos[1].st_size);
+    // printf("%lld\n", infos[2].st_size);
+    // printf("%lld\n", infos[3].st_size);
+    // printf("%lld\n", infos[4].st_size);
+
+// void show_file_info(char *filename, struct stat *info_p) {
+    
+
+//     printf("%12ld    ", (long)info_p->st_size);
+//     printf("%.19ld     ", info_p->st_mtime);
+//     printf("%s\n", filename);
+// }
 
 // 测试：
 // ./a.out 
